@@ -1,47 +1,16 @@
-# Boomerang Worker Template
+# Boomerang Flow Lifecycle Worker
 
-Starter template for creating Boomerang Workers
+This is the Boomerang Flow Lifecycle Worker that runs as init and sidecar container for the Custom Flow Task or Bring Your Own container task in Flow.
 
-## Getting Started
+Depends on:
 
-1. Add `.js` file to `commands` folder that exports an object with functions
-2. Execute new method by running `npm run dev -- <filename> <method>`
+- [Boomerang Flow Worker](https://github.ibm.com/Boomerang-Workers/boomerang.worker.flow)
+- [Boomerang Worker CLI](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
+- [Boomerang Worker Core](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
 
-```js
-// ./commands/greetings.js
-module.exports = {
-  hello: () => console.log("Hello from Boomerang"),
-  goodbye: () => console.log("Goodbye, friend"),
-};
-```
+## Packaging
 
-```sh
-npm start -- greetings hello
-```
-
-## Folder Structure
-
-    |-- .npmrc
-    |-- Dockerfile
-    |-- .gitignore
-    |-- package.json
-    |-- README.md
-    |-- .github
-        |-- PULL_REQUEST_TEMPLATE.md
-    |-- commands
-        |-- lifecycle.js
-    |-- tests
-        |-- lifecycle.spec.js
-
-### Key Files and Directories
-
-`.npmrc` - necessary to install `@boomerang-worker` scoped npm modules
-`Dockerfile` - containerize and execute commands in a kubernetes environments
-`commands` - where all of your modules are located to be registered and executed by `boomerang-worker-cli`
-
-### How it works
-
-The `boomerang-worker-cli` imports all the `*.js` modules in the `./commands` directory. The file name of the exported module becomes the `commmand` and any functions on the exported object are executable methods.
+`VERSION=2.0.0 && docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION -f Dockerfile.lifecycle . && docker push tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION`
 
 ## Available Scripts
 
@@ -99,7 +68,3 @@ Enable commit standards via [Conventional Commits](https://www.conventionalcommi
 ## Troubleshooting
 
 - Make sure that your `commands` directory only includes `.js` files that export modules. The CLI will try to register every matching file in it.
-
-## Further Reading
-
-- [Boomerang Worker CLI and Core](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
