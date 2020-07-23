@@ -1,20 +1,17 @@
 {
   "name": "boomerang.worker.flow.lifecycle",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Boomerang Worker Flow Lifecycle",
-  "repository": "git@github.ibm.com:Boomerang/boomerang.worker.flow.lifecycle.git",
-  "author": "Boomerang Joe <boomrng@us.ibm.com>",
+  "repository": "git@github.com:boomerang-io/boomerang.worker.flow.lifecycle.git",
+  "author": "Tyson Lawrie <tyson@lawrie.com.au>",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "engines": {
     "node": ">=8.10.0"
   },
-  "publishConfig": {
-    "registry": "https://tools.boomerangplatform.net/artifactory/api/npm/boomeranglib-npm/"
-  },
-  "license": "MIT",
   "dependencies": {
-    "@boomerang-worker/cli": "^0.4.0",
-    "@boomerang-worker/core": "^0.3.0",
+    "@boomerang-io/worker-cli": "^0.4.0",
+    "@boomerang-io/worker-core": "^0.3.0",
     "node-fetch": "^2.6.0",
     "properties": "^1.2.1",
     "wait-on": "^4.0.2"

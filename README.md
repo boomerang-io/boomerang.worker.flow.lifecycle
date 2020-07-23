@@ -4,13 +4,19 @@ This is the Boomerang Flow Lifecycle Worker that runs as init and sidecar contai
 
 Depends on:
 
-- [Boomerang Flow Worker](https://github.ibm.com/Boomerang-Workers/boomerang.worker.flow)
-- [Boomerang Worker CLI](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
-- [Boomerang Worker Core](https://github.ibm.com/Boomerang-Workers/boomerang.worker.base)
+- [Boomerang Flow Worker](https://github.com/boomerang-io/boomerang.worker.flow)
+- [Boomerang Worker CLI](https://github.com/boomerang-io/boomerang.worker.interfaces)
+- [Boomerang Worker Core](https://github.com/boomerang-io/boomerang.worker.interfaces)
 
 ## Packaging
 
-`VERSION=2.0.0 && docker build -t tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION -f Dockerfile.lifecycle . && docker push tools.boomerangplatform.net:8500/ise/bmrg-worker-lifecycle:$VERSION`
+### CICD
+
+This project is built, tested, and packaged via the Boomerang CICD system hosted and provided by IBM.
+
+### Manual
+
+`VERSION=1.0.0 && docker build -t docker.pkg.github.com/boomerang-io/bmrg-worker-flow:$VERSION . && docker push docker.pkg.github.com/boomerang-io/bmrg-worker-flow:$VERSION`
 
 ## Available Scripts
 
