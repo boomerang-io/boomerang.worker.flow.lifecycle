@@ -10,7 +10,7 @@
     "node": ">=8.10.0"
   },
   "dependencies": {
-    "@boomerang-io/worker-cli": "^0.7.4",
+    "@boomerang-io/worker-cli": "^0.7.6",
     "@boomerang-io/worker-core": "^0.6.3",
     "node-fetch": "^2.6.0",
     "properties": "^1.2.1",
