@@ -16,7 +16,7 @@ This project is built, tested, and packaged via the Boomerang CICD system hosted
 
 ### Manual
 
-`VERSION=1.0.1 && docker build -t boomerangio/worker-lifecycle:$VERSION . && docker push boomerangio/worker-lifecycle:$VERSION`
+`VERSION=1.1.0 && docker build -t boomerangio/worker-lifecycle:$VERSION . && docker push boomerangio/worker-lifecycle:$VERSION`
 
 ## Available Scripts
 
