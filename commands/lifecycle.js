@@ -1,5 +1,5 @@
-const waitOn = require("wait-on");
 const { log, utils } = require("@boomerang-io/worker-core");
+const waitOn = require("wait-on");
 const properties = require("properties");
 const fs = require("fs");
 const { NODE_ENV } = process.env;
@@ -30,9 +30,9 @@ module.exports = {
     /**
      * Read the environment variables from custom task populated env file
      */
-    var parsedEnvParams;
+    var parsedEnvParams = {};
     if (!fs.existsSync(lifecycleFileEnv)) {
-      log.warn("File not found");
+      log.warn("Env file not available.");
     } else {
       const contents = fs.readFileSync(lifecycleFileEnv, "utf8");
       log.debug("  File: " + lifecycleFileEnv + " Original Content: " + contents);
@@ -52,7 +52,7 @@ module.exports = {
       };
       parsedEnvParams = properties.parse(contents, parseOpts);
     }
-    log.debug("  Parsed Task Result Parameters: " + JSON.stringify(parsedEnvParams));
+    log.debug("Parsed Task Result Parameters: " + JSON.stringify(parsedEnvParams));
 
     /**
      * Turn any files in the lifecycle folder (other than env) into parameters
@@ -70,11 +70,11 @@ module.exports = {
         accum[file.replace(".", "_")] = encodedProp;
         return accum;
       }, {});
-    log.debug("  Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
+    log.debug("Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
 
     const joinedParams = { ...parsedEnvParams, ...fileParams };
 
-    log.debug("  All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
+    log.debug("All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
 
     await utils.setOutputParameters(joinedParams);
   },
