@@ -2,6 +2,8 @@ const waitOn = require("wait-on");
 const { log, utils } = require("@boomerang-io/worker-core");
 const properties = require("properties");
 const fs = require("fs");
+const { NODE_ENV } = process.env;
+const appRoot = require("app-root-path");
 
 module.exports = {
   async wait() {
@@ -9,7 +11,7 @@ module.exports = {
      * Wait for the lock to be removed by the controller service
      * This occurs when the worker-cntr completes
      */
-    const lifecyclePath = "/lifecycle";
+    const lifecyclePath = NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/lifecycle` : "/lifecycle";
     const lifecycleFileLock = lifecyclePath + "/lock";
     const lifecycleFileEnv = lifecyclePath + "/env";
     var opts = {
@@ -59,7 +61,7 @@ module.exports = {
      */
     const lifecycleFiles = fs.readdirSync(lifecyclePath);
     const fileParams = lifecycleFiles
-      .filter((file) => file !== "env" || file !== "lock")
+      .filter((file) => file !== "env" && file !== "lock")
       .reduce((accum, file) => {
         const contents = fs.readFileSync(`${lifecyclePath}/${file}`, "utf8");
         log.debug("  File: " + file + " Original Content: " + contents);

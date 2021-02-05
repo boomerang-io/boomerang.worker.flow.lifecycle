@@ -14,7 +14,8 @@
     "@boomerang-io/worker-core": "^1.2.2",
     "node-fetch": "^2.6.0",
     "properties": "^1.2.1",
-    "wait-on": "^4.0.2"
+    "wait-on": "^4.0.2",
+    "app-root-path": "^3.0.0"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=local boomerang-worker-cli",
