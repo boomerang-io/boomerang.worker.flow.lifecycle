@@ -1,7 +1,6 @@
 const waitOn = require("wait-on");
-const { log } = require("@boomerang-io/worker-core");
+const { log, utils } = require("@boomerang-io/worker-core");
 const properties = require("properties");
-const fetch = require("node-fetch");
 const fs = require("fs");
 
 module.exports = {
@@ -29,13 +28,13 @@ module.exports = {
     /**
      * Read the environment variables from custom task populated env file
      */
-    var parsedProps;
+    var parsedEnvParams;
     if (!fs.existsSync(lifecycleFileEnv)) {
       log.warn("File not found");
     } else {
       const contents = fs.readFileSync(lifecycleFileEnv, "utf8");
       log.debug("  File: " + lifecycleFileEnv + " Original Content: " + contents);
-      // Updated strict options for parsing multiline properties from textarea boxes.
+      // Updated strict options for parsing multiline parameters from textarea boxes.
       var parseOpts = {
         comments: "#",
         separators: "=",
@@ -49,41 +48,33 @@ module.exports = {
           }
         },
       };
-      parsedProps = properties.parse(contents, parseOpts);
+      parsedEnvParams = properties.parse(contents, parseOpts);
     }
-    log.debug("  Parsed Environment Output Properties: " + JSON.stringify(parsedProps));
+    log.debug("  Parsed Task Result Parameters: " + JSON.stringify(parsedEnvParams));
 
     /**
-     * Turn any files in the lifecycle folder (other than env) into properties
+     * Turn any files in the lifecycle folder (other than env) into parameters
      * key: filename
      * property: base64 encoded contents
      */
     const lifecycleFiles = fs.readdirSync(lifecyclePath);
-    const fileProps = lifecycleFiles
-      .filter((file) => file !== "env")
+    const fileParams = lifecycleFiles
+      .filter((file) => file !== "env" || file !== "lock")
       .reduce((accum, file) => {
-        const contents = fs.readFileSync(`/lifecycle/${file}`, "utf8");
+        const contents = fs.readFileSync(`${lifecyclePath}/${file}`, "utf8");
         log.debug("  File: " + file + " Original Content: " + contents);
         const encodedProp = new Buffer.from(contents).toString("base64");
         log.debug("  File: " + file + " Encoded Content: ", encodedProp);
         accum[file.replace(".", "_")] = encodedProp;
         return accum;
       }, {});
-    log.debug("  Encoded File Output Properties: " + JSON.stringify(fileProps));
+    log.debug("  Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
 
-    // parsedProps += properties.parse(fileProps);
-    var joinedProps = { ...parsedProps, ...fileProps };
-    log.debug("  All Parsed and Encoded Output Properties: " + JSON.stringify(joinedProps));
-    await fetch(
-      `http://bmrg-flow-services-controller/controller/properties/set?workflowId=${process.env.BMRG_WORKFLOW_ID}&workflowActivityId=${process.env.BMRG_ACTIVITY_ID}&taskId=${process.env.BMRG_TASK_ID}&taskName=${process.env.BMRG_TASK_NAME}`,
-      {
-        method: "patch",
-        body: JSON.stringify(joinedProps),
-        headers: { "Content-Type": "application/json" },
-      }
-    )
-      .then((res) => log.debug(res))
-      .catch((err) => log.err("setOutputProperties", err));
+    var joinedParams = { ...parsedEnvParams, ...fileParams };
+
+    log.debug("  All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
+
+    utils.setOutputParameters(joinedParams);
   },
   async init() {
     fs.writeFileSync("/lifecycle/lock", "");
