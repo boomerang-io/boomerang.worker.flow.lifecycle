@@ -70,11 +70,11 @@ module.exports = {
       }, {});
     log.debug("  Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
 
-    var joinedParams = { ...parsedEnvParams, ...fileParams };
+    const joinedParams = { ...parsedEnvParams, ...fileParams };
 
     log.debug("  All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
 
-    utils.setOutputParameters(joinedParams);
+    await utils.setOutputParameters(joinedParams);
   },
   async init() {
     fs.writeFileSync("/lifecycle/lock", "");
