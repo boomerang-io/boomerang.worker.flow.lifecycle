@@ -2,7 +2,7 @@ const { log, utils } = require("@boomerang-io/worker-core");
 const waitOn = require("wait-on");
 const properties = require("properties");
 const fs = require("fs");
-const { NODE_ENV } = process.env;
+const { NODE_ENV, DEBUG } = process.env;
 const appRoot = require("app-root-path");
 
 module.exports = {
@@ -19,6 +19,7 @@ module.exports = {
       reverse: true,
       delay: 180,
       verbose: false,
+      log: DEBUG === "true" ? true : false,
     };
     try {
       await waitOn(opts);
@@ -30,9 +31,10 @@ module.exports = {
     /**
      * Read the environment variables from custom task populated env file
      */
+    log.sys("Checking for environment file...");
     var parsedEnvParams = {};
     if (!fs.existsSync(lifecycleFileEnv)) {
-      log.warn("Env file not available.");
+      log.warn("env file not available.");
     } else {
       const contents = fs.readFileSync(lifecycleFileEnv, "utf8");
       log.debug("  File: " + lifecycleFileEnv + " Original Content: " + contents);
@@ -59,6 +61,7 @@ module.exports = {
      * key: filename
      * property: base64 encoded contents
      */
+    log.sys("Checking for files...");
     const lifecycleFiles = fs.readdirSync(lifecyclePath);
     const fileParams = lifecycleFiles
       .filter((file) => file !== "env" && file !== "lock")
