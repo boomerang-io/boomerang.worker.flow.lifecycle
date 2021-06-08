@@ -1,4 +1,4 @@
-const { log, utils } = require("@boomerang-io/worker-core");
+const { log } = require("@boomerang-io/worker-core");
 const waitOn = require("wait-on");
 const properties = require("properties");
 const fs = require("fs");
@@ -65,12 +65,15 @@ function findAndAggregateParameters() {
 }
 
 module.exports = {
-  async wait() {
+  async init() {
+    const params = findAndAggregateParameters();
+
+    fs.writeFileSync("/lifecycle/lock", "");
+
     /**
      * Wait for the lock to be removed by the controller service
      * This occurs when the worker-cntr completes
      */
-
     var opts = {
       resources: [lifecycleFileLock],
       reverse: true,
@@ -84,16 +87,6 @@ module.exports = {
       log.err(err);
       process.exit(1);
     }
-
-    const params = findAndAggregateParameters();
-
-    await utils.setOutputParameters(params);
-  },
-  async init() {
-    fs.writeFileSync("/lifecycle/lock", "");
-  },
-  async retrieveAndWait() {
-    const params = findAndAggregateParameters();
 
     log.debug(params);
   },
