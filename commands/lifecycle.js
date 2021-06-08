@@ -4,6 +4,9 @@ const properties = require("properties");
 const fs = require("fs");
 const { NODE_ENV, DEBUG } = process.env;
 const appRoot = require("app-root-path");
+const lifecyclePath = NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/lifecycle` : "/lifecycle";
+const lifecycleFileLock = lifecyclePath + "/lock";
+const lifecycleFileEnv = lifecyclePath + "/env";
 
 module.exports = {
   async wait() {
@@ -11,9 +14,7 @@ module.exports = {
      * Wait for the lock to be removed by the controller service
      * This occurs when the worker-cntr completes
      */
-    const lifecyclePath = NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/lifecycle` : "/lifecycle";
-    const lifecycleFileLock = lifecyclePath + "/lock";
-    const lifecycleFileEnv = lifecyclePath + "/env";
+
     var opts = {
       resources: [lifecycleFileLock],
       reverse: true,
@@ -28,6 +29,12 @@ module.exports = {
       process.exit(1);
     }
 
+    await this.do();
+  },
+  async init() {
+    fs.writeFileSync("/lifecycle/lock", "");
+  },
+  async do() {
     /**
      * Read the environment variables from custom task populated env file
      */
@@ -80,8 +87,5 @@ module.exports = {
     log.debug("All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
 
     await utils.setOutputParameters(joinedParams);
-  },
-  async init() {
-    fs.writeFileSync("/lifecycle/lock", "");
   },
 };
