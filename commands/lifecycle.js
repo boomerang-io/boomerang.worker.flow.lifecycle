@@ -8,6 +8,62 @@ const lifecyclePath = NODE_ENV === "local" || NODE_ENV === "test" ? `${appRoot}/
 const lifecycleFileLock = lifecyclePath + "/lock";
 const lifecycleFileEnv = lifecyclePath + "/env";
 
+//Internal helper function
+function findAndAggregateParameters() {
+  /**
+   * Read the environment variables from custom task populated env file
+   */
+  log.sys("Checking for environment file...");
+  var parsedEnvParams = {};
+  if (!fs.existsSync(lifecycleFileEnv)) {
+    log.warn("env file not available.");
+  } else {
+    const contents = fs.readFileSync(lifecycleFileEnv, "utf8");
+    log.debug("  File: " + lifecycleFileEnv + " Original Content: " + contents);
+    // Updated strict options for parsing multiline parameters from textarea boxes.
+    var parseOpts = {
+      comments: "#",
+      separators: "=",
+      strict: true,
+      reviver: function (key, value) {
+        if (key != null && value == null) {
+          return '""';
+        } else {
+          //Returns all the lines
+          return this.assert();
+        }
+      },
+    };
+    parsedEnvParams = properties.parse(contents, parseOpts);
+  }
+  log.debug("Parsed Task Result Parameters: " + JSON.stringify(parsedEnvParams));
+
+  /**
+   * Turn any files in the lifecycle folder (other than env) into parameters
+   * key: filename
+   * property: base64 encoded contents
+   */
+  log.sys("Checking for files...");
+  const lifecycleFiles = fs.readdirSync(lifecyclePath);
+  const fileParams = lifecycleFiles
+    .filter((file) => file !== "env" && file !== "lock")
+    .reduce((accum, file) => {
+      const contents = fs.readFileSync(`${lifecyclePath}/${file}`, "utf8");
+      log.debug("  File: " + file + " Original Content: " + contents);
+      const encodedProp = new Buffer.from(contents).toString("base64");
+      log.debug("  File: " + file + " Encoded Content: ", encodedProp);
+      accum[file.replace(".", "_")] = encodedProp;
+      return accum;
+    }, {});
+  log.debug("Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
+
+  const joinedParams = { ...parsedEnvParams, ...fileParams };
+
+  log.debug("All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
+
+  return joinedParams;
+}
+
 module.exports = {
   async wait() {
     /**
@@ -29,63 +85,16 @@ module.exports = {
       process.exit(1);
     }
 
-    await this.do();
+    const params = findAndAggregateParameters();
+
+    await utils.setOutputParameters(params);
   },
   async init() {
     fs.writeFileSync("/lifecycle/lock", "");
   },
-  async do() {
-    /**
-     * Read the environment variables from custom task populated env file
-     */
-    log.sys("Checking for environment file...");
-    var parsedEnvParams = {};
-    if (!fs.existsSync(lifecycleFileEnv)) {
-      log.warn("env file not available.");
-    } else {
-      const contents = fs.readFileSync(lifecycleFileEnv, "utf8");
-      log.debug("  File: " + lifecycleFileEnv + " Original Content: " + contents);
-      // Updated strict options for parsing multiline parameters from textarea boxes.
-      var parseOpts = {
-        comments: "#",
-        separators: "=",
-        strict: true,
-        reviver: function (key, value) {
-          if (key != null && value == null) {
-            return '""';
-          } else {
-            //Returns all the lines
-            return this.assert();
-          }
-        },
-      };
-      parsedEnvParams = properties.parse(contents, parseOpts);
-    }
-    log.debug("Parsed Task Result Parameters: " + JSON.stringify(parsedEnvParams));
+  async retrieveAndWait() {
+    const params = findAndAggregateParameters();
 
-    /**
-     * Turn any files in the lifecycle folder (other than env) into parameters
-     * key: filename
-     * property: base64 encoded contents
-     */
-    log.sys("Checking for files...");
-    const lifecycleFiles = fs.readdirSync(lifecyclePath);
-    const fileParams = lifecycleFiles
-      .filter((file) => file !== "env" && file !== "lock")
-      .reduce((accum, file) => {
-        const contents = fs.readFileSync(`${lifecyclePath}/${file}`, "utf8");
-        log.debug("  File: " + file + " Original Content: " + contents);
-        const encodedProp = new Buffer.from(contents).toString("base64");
-        log.debug("  File: " + file + " Encoded Content: ", encodedProp);
-        accum[file.replace(".", "_")] = encodedProp;
-        return accum;
-      }, {});
-    log.debug("Encoded Task File Result Parameters: " + JSON.stringify(fileParams));
-
-    const joinedParams = { ...parsedEnvParams, ...fileParams };
-
-    log.debug("All Parsed and Encoded Output parameters: " + JSON.stringify(joinedParams));
-
-    await utils.setOutputParameters(joinedParams);
+    log.debug(params);
   },
 };
