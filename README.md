@@ -1,3 +1,5 @@
+:warning: **_this project has been deprecated with the move to Tekton_**
+
 # Boomerang Flow Lifecycle Worker
 
 This is the Boomerang Flow Lifecycle Worker that runs as init and sidecar container for the Custom Flow Task or Bring Your Own container task in Flow.
